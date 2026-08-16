@@ -1,224 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>UNO Online Pro Max</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON DEPLOY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --dark-bg: #05070a;
+            --card-bg: #0d1117;
+            --danger: #ff4444;
+        }
 
-<style>
-body{
-  margin:0;
-  background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 70%);
-  font-family: Arial Black;
-  color:white;
-  text-align:center;
-}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--dark-bg);
+            color: #e6edf3;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
 
-#loginScreen{ margin-top:100px; }
+        .container {
+            width: 100%; max-width: 450px;
+            background: var(--card-bg);
+            padding: 2rem; border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            border: 1px solid rgba(0, 210, 255, 0.1);
+        }
 
-input,button{
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin:5px;
-}
+        h1 { color: var(--neon-blue); text-align: center; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 20px; letter-spacing: 2px; }
 
-button{
-  background:#FFD700;
-  font-weight:bold;
-  cursor:pointer;
-}
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; color: var(--neon-blue); margin-bottom: 5px; }
+        
+        input[type="text"] {
+            width: 100%; padding: 12px; background: #161b22; border: 1px solid #30363d;
+            border-radius: 8px; color: white; outline: none; box-sizing: border-box;
+        }
+        input[type="text"]:focus { border-color: var(--neon-blue); }
 
-#game{ display:none; }
+        .upload-zone {
+            border: 2px dashed #30363d; padding: 1.5rem; border-radius: 12px;
+            text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 20px;
+        }
+        .upload-zone:hover { border-color: var(--neon-blue); background: rgba(0, 210, 255, 0.05); }
+        #fileInput { display: none; }
 
-.card{
-  width:70px;
-  height:100px;
-  border-radius:14px;
-  display:inline-flex;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
-  margin:5px;
-  cursor:pointer;
-}
+        .btn-deploy {
+            width: 100%; padding: 14px; background: transparent; border: 2px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; border-radius: 10px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-deploy:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
 
-.red{ background:#FF0000; }
-.blue{ background:#0066FF; }
-.green{ background:#00AA00; }
-.yellow{ background:#FFD700; color:black; }
-</style>
+        /* History */
+        .history { margin-top: 30px; border-top: 1px solid #30363d; padding-top: 20px; }
+        .project-item {
+            background: #161b22; padding: 10px; border-radius: 8px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--neon-blue);
+        }
+        .project-link { color: cyan; text-decoration: none; font-size: 0.8rem; display: block; }
+        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; }
+
+        .loader { display: none; text-align: center; color: var(--neon-blue); margin: 10px 0; }
+    </style>
 </head>
-
 <body>
 
-<div id="loginScreen">
-  <h1>UNO ONLINE PRO MAX</h1>
-  <input id="nameInput" placeholder="Masukkan Nama">
-  <button onclick="login()">Login</button>
+<div class="container">
+    <h1>NEON DEPLOY</h1>
+
+    <div class="input-group">
+        <label>NAMA WEBSITE (PROJECT NAME)</label>
+        <input type="text" id="webName" placeholder="misal: web-saya-keren">
+    </div>
+
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-file-archive" style="font-size: 2rem; color: var(--neon-blue);"></i>
+        <p id="fileNameDisplay">Pilih HTML atau ZIP</p>
+    </div>
+    <input type="file" id="fileInput" accept=".html,.zip" onchange="document.getElementById('fileNameDisplay').innerText = this.files[0].name">
+
+    <button class="btn-deploy" onclick="gasDeploy()">DEPLOY SEKARANG</button>
+    <div class="loader" id="loader"><i class="fas fa-sync fa-spin"></i> Processing...</div>
+
+    <div class="history">
+        <p style="font-size: 0.8rem; color: #8b949e;"><i class="fas fa-history"></i> RIWAYAT & HAPUS PROYEK</p>
+        <div id="historyList"></div>
+    </div>
 </div>
 
-<div id="game">
-  <h2 id="playerInfo"></h2>
+<script>
+    // MASUKKAN TOKEN KAMU DI SINI
+    const MY_TOKEN = "FTrv15Qawk09Gz42D3dc2qvo";
 
-  <button onclick="createRoom()">Buat Room</button>
-  <input id="roomInput" placeholder="Room ID">
-  <button onclick="joinRoom()">Join Room</button>
+    let history = JSON.parse(localStorage.getItem('gigs_deploy_history')) || [];
+    renderHistory();
 
-  <h3>Discard:</h3>
-  <div id="discard"></div>
+    async function gasDeploy() {
+        const name = document.getElementById('webName').value;
+        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
 
-  <h3>Kartu Kamu:</h3>
-  <div id="hand"></div>
+        if (!name || fileInput.files.length === 0) return alert("Isi nama web & pilih file!");
+        if (MY_TOKEN === "FTrv15Qawk09Gz42D3dc2qvo") return alert("Isi token dulu di kode HTML!");
 
-  <h3>Chat</h3>
-  <div id="chatBox"></div>
-  <input id="chatInput" placeholder="Ketik...">
-  <button onclick="sendChat()">Kirim</button>
-</div>
+        loader.style.display = "block";
+        const file = fileInput.files[0];
+        const reader = new FileReader();
 
-<script type="module">
+        reader.onload = async (e) => {
+            try {
+                const res = await fetch('https://api.vercel.com/v13/deployments', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${MY_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        files: [{ file: file.name, data: btoa(unescape(encodeURIComponent(e.target.result))) }],
+                        projectSettings: { framework: null }
+                    })
+                });
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+                const data = await res.json();
+                if (res.ok) {
+                    history.unshift({ id: data.id, name: name, url: data.url });
+                    localStorage.setItem('gigs_deploy_history', JSON.stringify(history));
+                    renderHistory();
+                    alert("Berhasil!");
+                } else { alert("Gagal: " + data.error.message); }
+            } catch (err) { alert(err.message); }
+            finally { loader.style.display = "none"; }
+        };
+        reader.readAsText(file);
+    }
 
-/* ================= FIREBASE CONFIG ================= */
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = history.map((p, i) => `
+            <div class="project-item">
+                <div>
+                    <strong style="font-size:0.8rem">${p.name}</strong>
+                    <a href="https://${p.url}" target="_blank" class="project-link">${p.url}</a>
+                </div>
+                <button class="btn-del" onclick="hapusProyek('${p.id}', ${i})"><i class="fas fa-trash"></i></button>
+            </div>
+        `).join('');
+    }
 
-const firebaseConfig = {
-  apiKey: "ISI_API_KEY_KAMU",
-  authDomain: "ISI_AUTH_DOMAIN",
-  databaseURL: "ISI_DATABASE_URL",
-  projectId: "ISI_PROJECT_ID",
-  storageBucket: "ISI_STORAGE_BUCKET",
-  messagingSenderId: "ISI_SENDER_ID",
-  appId: "ISI_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-/* ================= GLOBAL ================= */
-
-let playerName="";
-let roomId="";
-let playerId="";
-
-/* ================= LOGIN ================= */
-
-window.login = async function(){
-  const name = document.getElementById("nameInput").value.trim();
-  if(!name) return alert("Masukkan nama!");
-
-  await signInAnonymously(auth);
-
-  playerName=name;
-  localStorage.setItem("unoName",name);
-
-  document.getElementById("loginScreen").style.display="none";
-  document.getElementById("game").style.display="block";
-};
-
-/* ================= ROOM ================= */
-
-window.createRoom=function(){
-  roomId="ROOM"+Math.floor(Math.random()*9999);
-  joinRoom();
-}
-
-window.joinRoom=function(){
-  roomId=document.getElementById("roomInput").value||roomId;
-  playerId="P"+Math.floor(Math.random()*9999);
-
-  set(ref(db,"rooms/"+roomId+"/players/"+playerId),{
-    name:playerName,
-    hand:[randomCard(),randomCard(),randomCard(),randomCard(),randomCard()]
-  });
-
-  set(ref(db,"rooms/"+roomId+"/discard"),randomCard());
-
-  listenRoom();
-}
-
-function listenRoom(){
-  onValue(ref(db,"rooms/"+roomId),(snap)=>{
-    let data=snap.val();
-    if(!data) return;
-
-    renderDiscard(data.discard);
-    let me=data.players[playerId];
-    if(me) renderHand(me.hand);
-  });
-
-  onValue(ref(db,"rooms/"+roomId+"/chat"),(snap)=>{
-    let data=snap.val();
-    if(!data) return;
-
-    let html="";
-    Object.values(data).forEach(c=>{
-      html+="<b>"+c.name+":</b> "+c.text+"<br>";
-    });
-
-    document.getElementById("chatBox").innerHTML=html;
-  });
-}
-
-/* ================= CARD ================= */
-
-const colors=["red","blue","green","yellow"];
-const values=["1","2","3","4","5","6","7","8","9","+2","R","S"];
-
-function randomCard(){
-  return{
-    color:colors[Math.floor(Math.random()*4)],
-    value:values[Math.floor(Math.random()*values.length)]
-  };
-}
-
-function renderHand(hand){
-  let html="";
-  hand.forEach((c,i)=>{
-    html+=`<div class="card ${c.color}" onclick="playCard(${i})">${c.value}</div>`;
-  });
-  document.getElementById("hand").innerHTML=html;
-}
-
-function renderDiscard(card){
-  document.getElementById("discard").innerHTML=
-  `<div class="card ${card.color}">${card.value}</div>`;
-}
-
-window.playCard=function(index){
-  onValue(ref(db,"rooms/"+roomId),(snap)=>{
-    let data=snap.val();
-    let me=data.players[playerId];
-    let card=me.hand[index];
-    let top=data.discard;
-
-    if(card.color!==top.color && card.value!==top.value) return;
-
-    me.hand.splice(index,1);
-    data.discard=card;
-
-    set(ref(db,"rooms/"+roomId),data);
-  },{onlyOnce:true});
-}
-
-/* ================= CHAT ================= */
-
-window.sendChat=function(){
-  let msg=document.getElementById("chatInput").value;
-  if(!msg) return;
-
-  push(ref(db,"rooms/"+roomId+"/chat"),{
-    name:playerName,
-    text:msg
-  });
-
-  document.getElementById("chatInput").value="";
-};
-
+    async function hapusProyek(id, index) {
+        if (!confirm("Hapus dari Vercel?")) return;
+        try {
+            await fetch(`https://api.vercel.com/v13/deployments/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${MY_TOKEN}` }
+            });
+            history.splice(index, 1);
+            localStorage.setItem('gigs_deploy_history', JSON.stringify(history));
+            renderHistory();
+        } catch (err) { alert("Gagal hapus!"); }
+    }
 </script>
-
 </body>
-</html>
+      </html>
+  
