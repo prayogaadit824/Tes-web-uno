@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Private Web Chat</title>
-  <!-- FontAwesome & Firebase SDK -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
@@ -15,8 +15,8 @@
       --accent: #00f3ff;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --my-msg: #1e293b;
-      --friend-msg: #0f172a;
+      --my-msg: #0284c7;
+      --friend-msg: #1e293b;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -24,36 +24,30 @@
 
     .container { width: 100%; max-width: 480px; height: 100vh; background: var(--card); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
     
-    /* Auth Form */
     .auth-screen { padding: 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 1rem; text-align: center; }
     .auth-screen h2 { color: var(--accent); margin-bottom: 0.5rem; }
     .input-box { width: 100%; padding: 0.8rem; background: #222936; border: 1px solid rgba(0,243,255,0.2); border-radius: 8px; color: #fff; outline: none; }
     .btn { padding: 0.8rem; background: var(--accent); border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn:hover { opacity: 0.9; }
 
-    /* Chat App Header */
     .chat-header { padding: 1rem; background: #0f131a; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
     .user-info span { font-size: 0.8rem; color: var(--accent); }
 
-    /* Target User Input */
     .target-bar { padding: 0.6rem 1rem; background: #1a212d; display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .target-bar input { flex: 1; padding: 0.4rem 0.8rem; background: #111620; border: 1px solid #2d3748; border-radius: 6px; color: #fff; font-size: 0.85rem; outline: none; }
 
-    /* Chat Messages Box */
     .chat-box { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; }
-    .msg { max-width: 75%; padding: 0.6rem 0.9rem; border-radius: 12px; font-size: 0.9rem; word-break: break-word; }
-    .msg.me { align-self: flex-end; background: var(--my-msg); border: 1px solid var(--accent); color: #fff; border-bottom-right-radius: 2px; }
+    .msg { max-width: 80%; padding: 0.6rem 0.9rem; border-radius: 12px; font-size: 0.9rem; word-break: break-word; }
+    .msg.me { align-self: flex-end; background: var(--my-msg); color: #fff; border-bottom-right-radius: 2px; }
     .msg.friend { align-self: flex-start; background: var(--friend-msg); border: 1px solid #334155; border-bottom-left-radius: 2px; }
-    .msg img, .msg video { max-width: 100%; border-radius: 8px; margin-top: 0.4rem; }
+    .msg img, .msg video { max-width: 100%; border-radius: 8px; margin-top: 0.4rem; display: block; }
     .msg a { color: var(--accent); text-decoration: underline; }
 
-    /* Input Bar */
     .input-bar { padding: 0.8rem; background: #0f131a; display: flex; align-items: center; gap: 0.5rem; }
-    .file-label { cursor: pointer; color: var(--text-muted); padding: 0.5rem; }
+    .file-label { cursor: pointer; color: var(--text-muted); padding: 0.5rem; font-size: 1.2rem; }
     .file-label:hover { color: var(--accent); }
     
-    /* Sticker Box */
-    .sticker-picker { display: none; position: absolute; bottom: 60px; left: 10px; background: #111620; border: 1px solid #2d3748; border-radius: 8px; padding: 0.5rem; gap: 0.5rem; }
+    .sticker-picker { display: none; position: absolute; bottom: 65px; left: 10px; background: #111620; border: 1px solid #2d3748; border-radius: 8px; padding: 0.5rem; gap: 0.8rem; z-index: 10; }
     .sticker-picker span { font-size: 1.5rem; cursor: pointer; }
 
     .hidden { display: none !important; }
@@ -63,16 +57,16 @@
 
 <div class="container">
   
-  <!-- Screen 1: Daftar Nama & Username -->
+  <!-- Screen 1: Register -->
   <div id="authScreen" class="auth-screen">
     <h2>⚡ Quick WebChat</h2>
-    <p style="color: var(--text-muted); font-size: 0.85rem;">Daftar akun tanpa nomor HP untuk kirim pesan realtime.</p>
-    <input type="text" id="regName" class="input-box" placeholder="Nama Lengkap / Panggilan" />
-    <input type="text" id="regUsername" class="input-box" placeholder="Buat Username (Tanpa spasi)" />
+    <p style="color: var(--text-muted); font-size: 0.85rem;">Daftar nama & username buat langsung chat temen!</p>
+    <input type="text" id="regName" class="input-box" placeholder="Nama Kamu" />
+    <input type="text" id="regUsername" class="input-box" placeholder="Buat Username (Contoh: dimas)" />
     <button class="btn" onclick="registerUser()">Mulai Chatting</button>
   </div>
 
-  <!-- Screen 2: Dashboard Chat -->
+  <!-- Screen 2: Chat App -->
   <div id="chatScreen" class="chat-screen hidden" style="height: 100%; display: flex; flex-direction: column;">
     <div class="chat-header">
       <div class="user-info">
@@ -82,20 +76,17 @@
       <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 
-    <!-- Bar untuk memilih lawan chat -->
     <div class="target-bar">
-      <input type="text" id="targetUsername" placeholder="Ketik Username Teman..." />
-      <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="connectChat()">Chat</button>
+      <input type="text" id="targetUsername" placeholder="Ketik username temen kamu..." />
+      <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="connectChat()">Hubungkan</button>
     </div>
 
-    <!-- Ruang Pesan -->
     <div class="chat-box" id="chatBox">
-      <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">
-        Ketik username teman kamu di bar atas lalu tekan "Chat" untuk mulai pesan.
+      <div id="statusInfo" style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">
+        Ketik username teman kamu di atas lalu klik <b>Hubungkan</b>.
       </div>
     </div>
 
-    <!-- Popup Stiker Sederhana -->
     <div id="stickerPicker" class="sticker-picker">
       <span onclick="sendSticker('🔥')">🔥</span>
       <span onclick="sendSticker('😎')">😎</span>
@@ -104,7 +95,6 @@
       <span onclick="sendSticker('❤️')">❤️</span>
     </div>
 
-    <!-- Bar Input Pesan & File -->
     <div class="input-bar">
       <span class="file-label" onclick="toggleStickers()"><i class="far fa-smile"></i></span>
       
@@ -114,25 +104,27 @@
       </label>
 
       <input type="text" id="messageInput" class="input-box" placeholder="Ketik pesan..." style="flex:1;" onkeydown="if(event.key==='Enter') sendMessage()" />
-      <button class="btn" onclick="sendMessage()"><i class="fas fa-paperplane"></i></button>
+      <button class="btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 
 </div>
 
 <script>
-  // 1. Inisialisasi Firebase Realtime Database
-  // Ganti konfigurasi bawah ini memakai projek Firebase milikmu secara gratis di console.firebase.google.com
+  // Database Public Realtime (Langsung Terhubung & Tanpa Autentikasi)
   const firebaseConfig = {
-    databaseURL: "https://testing-chat-default-rtdb.firebaseio.com/" // Contoh URL Realtime DB
+    databaseURL: "https://gigs-chat-default-rtdb.asia-southeast1.firebasedatabase.app"
   };
-  firebase.initializeApp(firebaseConfig);
+  
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
   const db = firebase.database();
 
-  let currentUser = JSON.parse(localStorage.getItem('chat_user')) || null;
+  let currentUser = JSON.parse(localStorage.getItem('webchat_user')) || null;
   let activeRoomId = null;
+  let chatListener = null;
 
-  // Auto Login jika sudah pernah daftar
   window.onload = () => {
     if (currentUser) {
       showChatScreen();
@@ -146,7 +138,7 @@
     if (!name || !username) return alert('Isi Nama dan Username dulu!');
 
     currentUser = { name, username };
-    localStorage.setItem('chat_user', JSON.stringify(currentUser));
+    localStorage.setItem('webchat_user', JSON.stringify(currentUser));
     showChatScreen();
   }
 
@@ -158,25 +150,31 @@
   }
 
   function logout() {
-    localStorage.removeItem('chat_user');
+    localStorage.removeItem('webchat_user');
     location.reload();
   }
 
-  // Hubungkan Chat dengan Username Teman
   function connectChat() {
-    const target = document.getElementById('targetUsername').value.trim().toLowerCase();
+    const target = document.getElementById('targetUsername').value.trim().toLowerCase().replace(/\s+/g, '');
     if (!target) return alert('Masukkan username teman!');
-    if (target === currentUser.username) return alert('Tidak bisa chat ke diri sendiri!');
+    if (target === currentUser.username) return alert('Gak bisa chat ke diri sendiri!');
 
-    // Buat ID Room Unik dari gabungan 2 username
+    // Buat Room ID Unik
     const sorted = [currentUser.username, target].sort();
     activeRoomId = `room_${sorted[0]}_${sorted[1]}`;
 
-    // Dengarkan pesan realtime
     const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML = '<div style="text-align:center; color:#00f3ff; font-size:0.8rem;">Menghubungkan ruang chat...</div>';
+
+    // Matikan listener lama jika ada
+    if (chatListener) {
+      db.ref('chats/' + activeRoomId).off('child_added', chatListener);
+    }
+
     chatBox.innerHTML = '';
 
-    db.ref('chats/' + activeRoomId).on('child_added', (snapshot) => {
+    // Dengarkan Pesan Realtime
+    chatListener = db.ref('chats/' + activeRoomId).on('child_added', (snapshot) => {
       const data = snapshot.val();
       renderMessage(data);
     });
@@ -189,18 +187,18 @@
     const msgDiv = document.createElement('div');
     msgDiv.className = `msg ${isMe ? 'me' : 'friend'}`;
 
-    let content = `<b>${isMe ? 'Kamu' : data.sender}</b><br>`;
+    let content = `<small style="opacity:0.7; font-size:0.7rem;">${isMe ? 'Kamu' : '@' + data.sender}</small><br>`;
 
     if (data.type === 'text') {
       content += data.body;
     } else if (data.type === 'sticker') {
-      content += `<span style="font-size:2.5rem">${data.body}</span>`;
+      content += `<span style="font-size:2.2rem">${data.body}</span>`;
     } else if (data.type === 'image') {
       content += `<img src="${data.body}" />`;
     } else if (data.type === 'video') {
       content += `<video src="${data.body}" controls></video>`;
     } else if (data.type === 'file') {
-      content += `<a href="${data.body}" download="file_${Date.now()}">📁 Unduh File</a>`;
+      content += `<a href="${data.body}" download="file_${Date.now()}">📁 Download File</a>`;
     }
 
     msgDiv.innerHTML = content;
@@ -211,7 +209,9 @@
   function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
-    if (!text || !activeRoomId) return alert('Pilih username teman terlebih dahulu!');
+
+    if (!activeRoomId) return alert('Klik tombol "Hubungkan" ke username temen kamu dulu!');
+    if (!text) return;
 
     db.ref('chats/' + activeRoomId).push({
       sender: currentUser.username,
@@ -224,7 +224,7 @@
   }
 
   function sendSticker(emoji) {
-    if (!activeRoomId) return alert('Pilih username teman terlebih dahulu!');
+    if (!activeRoomId) return alert('Klik tombol "Hubungkan" ke username temen kamu dulu!');
     db.ref('chats/' + activeRoomId).push({
       sender: currentUser.username,
       type: 'sticker',
@@ -239,14 +239,13 @@
     picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
   }
 
-  // Kirim Gambar/Video/File via Base64 Converter
   function sendFile(input) {
-    if (!activeRoomId) return alert('Pilih username teman terlebih dahulu!');
+    if (!activeRoomId) return alert('Klik tombol "Hubungkan" ke username temen kamu dulu!');
     const file = input.files[0];
     if (!file) return;
 
-    if (file.size > 3 * 1024 * 1024) {
-      return alert('Ukuran file maksimal 3MB agar cepat terkirim!');
+    if (file.size > 2 * 1024 * 1024) {
+      return alert('Ukuran file maksimal 2MB agar terkirim cepat!');
     }
 
     const reader = new FileReader();
@@ -269,5 +268,4 @@
 </script>
 
 </body>
-        </html>
-  
+</html>
